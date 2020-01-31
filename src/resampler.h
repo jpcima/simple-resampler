@@ -48,19 +48,6 @@ private:
     static Kmat makeLanczosKernel();
 
     /**
-       Storage for a history of Ksize samples
-       The second part [Ksize:2*Ksize-1] is a duplicate of [0:Ksize-1].
-       (vectorization purposes)
-     */
-    std::array<float, 2 * Ksize> fHistory = {};
-
-    /**
-       The history index points into the storage to the last Ksize samples of
-       signal.
-     */
-    uint32_t fHistoryIndex = 0;
-
-    /**
        Increment of the fractional input position every output frame
      */
     double fIncrPos = 1;
@@ -69,6 +56,19 @@ private:
        Current fractional position over input signal
      */
     double fFracPos = 0;
+
+    /**
+       The history index points into the storage to the last Ksize samples of
+       signal.
+     */
+    uint32_t fHistoryIndex = 0;
+
+    /**
+       Storage for a history of Ksize samples
+       The second part [Ksize:2*Ksize-1] is a duplicate of [0:Ksize-1].
+       (vectorization purposes)
+     */
+    std::array<float, 2 * Ksize> fHistory = {};
 };
 
 #include "resampler.tcc"
