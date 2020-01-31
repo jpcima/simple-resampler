@@ -69,8 +69,11 @@ auto Resampler<Nch, Ksize, Kover>::makeLanczosKernel() -> Kmat
         double offset = o / (double)Kover;
         double sum = 0;
         for (uint32_t i = 0; i < Ksize; ++i) {
-            double x = i - 0.5 * (Ksize - 1) - offset;
-            double k = sinc(x) / sinc(x / Ksize);
+            double a = 0.5 * (Ksize - 1);
+            double x = i - a - offset;
+            double k = 0;
+            if (x > -a && x < a)
+                k = sinc(x / a) * sinc(x);
             row[i] = k;
             sum += k;
         }
