@@ -49,7 +49,7 @@ auto Resampler<Ksize, Kover>::makeLanczosKernel() -> Kmat
     {
         if (x == 0)
             return 1;
-        return std::sin(x) / (M_PI * x);
+        return std::sin(M_PI * x) / (M_PI * x);
     };
 
     Kmat mat;
