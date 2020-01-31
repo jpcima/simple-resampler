@@ -15,7 +15,7 @@ void Resampler<Nch, Ksize, Kover>::resample(const G &getNext, const P &putNext, 
 {
     double incrPos = fIncrPos;
     double fracPos = fFracPos;
-    unsigned historyIndex = fHistoryIndex;
+    uint32_t historyIndex = fHistoryIndex;
 
     for (uint32_t i = 0; i < putCount; ++i) {
         fracPos += incrPos;
