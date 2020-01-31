@@ -30,13 +30,10 @@ void Resampler<Ksize, Kover>::resample(const G &getNext, const P &putNext, uint3
         const Krow &row = sKernel[(uint32_t)(fracPos * Kover)];
 
         float s = 0;
-        float ks = 0;
         for (uint32_t i = 0; i < Ksize; ++i) {
             float k = row[i];
             s += k * fHistory[historyIndex + i];
-            ks += k;
         }
-        s /= ks;
 
         putNext(s);
     }
@@ -59,11 +56,15 @@ auto Resampler<Ksize, Kover>::makeLanczosKernel() -> Kmat
     for (uint32_t o = 0; o < Kover; ++o) {
         Krow &row = mat[o];
         double offset = o / (double)Kover;
+        double sum = 0;
         for (uint32_t i = 0; i < Ksize; ++i) {
             double x = i - 0.5 * (Ksize - 1) - offset;
             double k = sinc(x) / sinc(x / Ksize);
             row[i] = k;
+            sum += k;
         }
+        for (uint32_t i = 0; i < Ksize; ++i)
+            row[i] /= sum; // normalize for unity gain
     }
     return mat;
 }
