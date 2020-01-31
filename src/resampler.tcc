@@ -27,7 +27,7 @@ void Resampler<Ksize, Kover>::resample(const G &getNext, const P &putNext, uint3
             fracPos -= 1.0;
         }
 
-        const Krow &row = sKernel[Kover - 1 - (uint32_t)(fracPos * Kover)];
+        const Krow &row = sKernel[(uint32_t)(fracPos * Kover)];
 
         float s = 0;
         float ks = 0;
@@ -60,7 +60,7 @@ auto Resampler<Ksize, Kover>::makeLanczosKernel() -> Kmat
         Krow &row = mat[o];
         double offset = o / (double)Kover;
         for (uint32_t i = 0; i < Ksize; ++i) {
-            double x = offset + i - 0.5 * (Ksize - 1);
+            double x = i - 0.5 * (Ksize - 1) - offset;
             double k = sinc(x) / sinc(x / Ksize);
             row[i] = k;
         }
