@@ -9,10 +9,11 @@
    This resampler convolves the input samples with a lowpass kernel evaluated
    at fractional intermediate points, depending on the output position.
 
+   `Nch` number of channels
    `Ksize` convolution size (higher = more quality, latency, computation)
    `Kover` oversampling of the lookup table, to lookup fractional values
  */
-template <uint32_t Ksize = 8, uint32_t Kover = 64>
+template <uint32_t Nch, uint32_t Ksize = 8, uint32_t Kover = 64>
 class Resampler {
 public:
     /**
@@ -68,7 +69,7 @@ private:
        The second part [Ksize:2*Ksize-1] is a duplicate of [0:Ksize-1].
        (vectorization purposes)
      */
-    std::array<float, 2 * Ksize> fHistory = {};
+    std::array<float, 2 * Ksize> fHistory[Nch] = {};
 };
 
 #include "resampler.tcc"

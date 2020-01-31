@@ -63,19 +63,55 @@ int main(int argc, char *argv[])
     snd_in.readf(in, in_frames);
     float *out = new float[out_frames * channels]{};
 
-    for (uint32_t c = 0; c < channels; ++c) {
-        Resampler<> rsm;
+    ///
+    uint32_t i_in = 0;
+    uint32_t i_out = 0;
+    auto getNextFrame = [&i_in, in, in_frames, channels](float *frame) {
+        if (i_in < in_frames) {
+            for (uint32_t c = 0; c < channels; ++c)
+                frame[c] = in[c + i_in * channels];
+            ++i_in;
+        }
+        else {
+            for (uint32_t c = 0; c < channels; ++c)
+                frame[c] = 0;
+        }
+    };
+    auto putNextFrame = [&i_out, out, channels](const float *frame) {
+        for (uint32_t c = 0; c < channels; ++c)
+            out[c + i_out * channels] = frame[c];
+        ++i_out;
+    };
+
+    ///
+    switch (channels) {
+    default:
+        fprintf(stderr, "Unsupported number of audio channels: %u\n", channels);
+        break;
+    case 1: {
+        Resampler<1> rsm;
         rsm.setup(ratio);
-        uint32_t i_in = 0;
-        uint32_t i_out = 0;
-        rsm.resample(
-            [&i_in, in, in_frames, c, channels]() -> float {
-                return (i_in < in_frames) ? in[c + channels * i_in++] : 0.0f;
-            },
-            [&i_out, out, c, channels](float s) {
-                out[c + channels * i_out++] = s;
-            },
-            out_frames);
+        rsm.resample(getNextFrame, putNextFrame, out_frames);
+        break;
+    }
+    case 2: {
+        Resampler<2> rsm;
+        rsm.setup(ratio);
+        rsm.resample(getNextFrame, putNextFrame, out_frames);
+        break;
+    }
+    case 4: {
+        Resampler<4> rsm;
+        rsm.setup(ratio);
+        rsm.resample(getNextFrame, putNextFrame, out_frames);
+        break;
+    }
+    case 8: {
+        Resampler<8> rsm;
+        rsm.setup(ratio);
+        rsm.resample(getNextFrame, putNextFrame, out_frames);
+        break;
+    }
     }
 
     snd_out.writef(out, out_frames);
