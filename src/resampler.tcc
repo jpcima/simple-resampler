@@ -77,8 +77,10 @@ auto Resampler<Nch, Ksize, Kover>::makeLanczosKernel() -> Kmat
             row[i] = k;
             sum += k;
         }
-        for (uint32_t i = 0; i < Ksize; ++i)
-            row[i] /= sum; // normalize for unity gain
+        if (0) {
+            for (uint32_t i = 0; i < Ksize; ++i)
+                row[i] /= sum; // normalize for unity gain
+        }
     }
     return mat;
 }

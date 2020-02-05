@@ -13,7 +13,7 @@
    `Ksize` convolution size (higher = more quality, latency, computation)
    `Kover` oversampling of the lookup table, to lookup fractional values
  */
-template <uint32_t Nch, uint32_t Ksize = 8, uint32_t Kover = 64>
+template <uint32_t Nch, uint32_t Ksize = 32, uint32_t Kover = 128>
 class Resampler {
 public:
     /**
