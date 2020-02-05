@@ -46,7 +46,7 @@ private:
        Each row is for a different fractional offset (0 <= frac < 1).
      */
     static const Kmat sKernel;
-    static Kmat makeLanczosKernel();
+    static Kmat makeKernel();
 
     /**
        Increment of the fractional input position every output frame

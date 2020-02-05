@@ -1,7 +1,11 @@
 #include "resampler.h"
+#include "resampler_math.h"
+#include <cmath>
+
+using namespace ResamplerMath;
 
 template <uint32_t Nch, uint32_t Ksize, uint32_t Kover>
-const typename Resampler<Nch, Ksize, Kover>::Kmat Resampler<Nch, Ksize, Kover>::sKernel = makeLanczosKernel();
+const typename Resampler<Nch, Ksize, Kover>::Kmat Resampler<Nch, Ksize, Kover>::sKernel = makeKernel();
 
 template <uint32_t Nch, uint32_t Ksize, uint32_t Kover>
 void Resampler<Nch, Ksize, Kover>::setup(double ratio)
@@ -54,7 +58,7 @@ void Resampler<Nch, Ksize, Kover>::resample(const G &getNext, const P &putNext, 
 }
 
 template <uint32_t Nch, uint32_t Ksize, uint32_t Kover>
-auto Resampler<Nch, Ksize, Kover>::makeLanczosKernel() -> Kmat
+auto Resampler<Nch, Ksize, Kover>::makeKernel() -> Kmat
 {
     auto sinc = [](double x) -> double
     {
@@ -72,8 +76,25 @@ auto Resampler<Nch, Ksize, Kover>::makeLanczosKernel() -> Kmat
             double a = 0.5 * (Ksize - 1);
             double x = i - a - offset;
             double k = 0;
+            double window = 0;
+
+            #if 0
+            // lanczos window
             if (x > -a && x < a)
-                k = sinc(x / a) * sinc(x);
+                window = sinc(x / a);
+            #else
+            // kaiser window
+            {
+                const double alpha = 2.0;
+                const double beta = M_PI * alpha;
+                double t = x / (0.5 * Ksize);
+                t = 1.0 - t * t;
+                if (t > 0)
+                    window = i0(beta * std::sqrt(t)) / i0(beta);
+            }
+            #endif
+
+            k = window * sinc(x);
             row[i] = k;
             sum += k;
         }

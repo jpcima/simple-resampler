@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION "3.3")
 project(resampler)
 
-add_library(resampler INTERFACE)
-target_include_directories(resampler INTERFACE "src")
+add_library(resampler STATIC "src/resampler_math.cpp")
+target_include_directories(resampler PUBLIC "src")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SNDFILE "sndfile")
