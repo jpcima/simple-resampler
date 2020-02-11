@@ -85,7 +85,7 @@ auto Resampler<Nch, Ksize, Kover>::makeKernel() -> Kmat
             #else
             // kaiser window
             {
-                const double alpha = 2.0;
+                const double alpha = 2.5;
                 const double beta = M_PI * alpha;
                 double t = x / (0.5 * Ksize);
                 t = 1.0 - t * t;
