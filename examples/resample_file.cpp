@@ -57,13 +57,26 @@ int main(int argc, char *argv[])
     float *in = new float[in_frames * channels]{};
     snd_in.readf(in, in_frames);
 
-    for (const ResamplingChoice &rc : sResamplingChoices) {
-        std::string this_out_path;
+    int exitcode = 0;
 
-        this_out_path = out_path;
+    #pragma omp parallel for
+    for (size_t i = 0; i < sResamplingChoices.size(); ++i) {
+        const ResamplingChoice &rc = sResamplingChoices[i];
+
+        std::string this_out_path = out_path;
         if (strcmp(rc.name, "mine") != 0) {
-            this_out_path += '.';
-            this_out_path += rc.name;
+            size_t pos_ext = this_out_path.rfind('.');
+            if (pos_ext == std::string::npos) {
+                this_out_path += '.';
+                this_out_path += rc.name;
+            }
+            else {
+                std::string ext = this_out_path.substr(pos_ext);
+                this_out_path.resize(pos_ext);
+                this_out_path += '.';
+                this_out_path += rc.name;
+                this_out_path += ext;
+            }
         }
 
         fprintf(stderr, "* Resample (%s): %s\n", rc.name, this_out_path.c_str());
@@ -71,17 +84,19 @@ int main(int argc, char *argv[])
         SndfileHandle snd_out{this_out_path.c_str(), SFM_WRITE, SF_FORMAT_WAV|SF_FORMAT_PCM_16, (int)channels, (int)samplerate};
         if (!snd_out) {
             fprintf(stderr, "Cannot open the output file: %s.\n", out_path);
-            return 1;
+            exitcode = 1;
+
         }
+        else {
+            float *out = new float[out_frames * channels]{};
 
-        float *out = new float[out_frames * channels]{};
+            rc.resample(
+                samplerate, ratio * samplerate,
+                in, in_frames, out, out_frames, channels);
 
-        rc.resample(
-            samplerate, ratio * samplerate,
-            in, in_frames, out, out_frames, channels);
-
-        snd_out.writef(out, out_frames);
+            snd_out.writef(out, out_frames);
+        }
     }
 
-    return 0;
+    return exitcode;
 }

@@ -1,6 +1,7 @@
 #include "file_resamplers.h"
 #include "resampler.h"
 #include <soxr.h>
+#include <samplerate.h>
 
 void resample_with_mine(
     double input_rate, double output_rate,
@@ -111,6 +112,61 @@ void resample_with_sox_lq(
 {
     resample_with_sox(
         soxr_quality_spec(SOXR_LQ, 0),
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+static void resample_with_src(
+    int converter_type,
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    SRC_DATA src_data = {};
+    src_data.data_in = in;
+    src_data.data_out = out;
+    src_data.input_frames = in_frames;
+    src_data.output_frames = out_frames;
+    src_data.src_ratio = output_rate / input_rate;
+
+    int err = src_simple(&src_data, converter_type, channels);
+    if (err != 0)
+        fprintf(stderr, "Error from Secret Rabbit Code resampler: %s\n", src_strerror(err));
+}
+
+void resample_with_src_best(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_src(
+        SRC_SINC_BEST_QUALITY,
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+void resample_with_src_medium(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_src(
+        SRC_SINC_MEDIUM_QUALITY,
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+void resample_with_src_fastest(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_src(
+        SRC_SINC_FASTEST,
         input_rate, output_rate,
         in, in_frames, out, out_frames, channels);
 }
