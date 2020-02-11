@@ -60,14 +60,14 @@ void resample_with_mine(
     }
 }
 
-void resample_with_sox_vhq(
+static void resample_with_sox(
+    soxr_quality_spec_t quality_spec,
     double input_rate, double output_rate,
     const float *in, size_t in_frames,
     float *out, size_t out_frames,
     unsigned channels)
 {
     soxr_io_spec_t io_spec = soxr_io_spec(SOXR_FLOAT32_I, SOXR_FLOAT32_I);
-    soxr_quality_spec_t quality_spec = soxr_quality_spec(SOXR_VHQ, 0);
     soxr_runtime_spec_t runtime_spec = soxr_runtime_spec(2);
 
     size_t idone = 0;
@@ -79,6 +79,41 @@ void resample_with_sox_vhq(
         fprintf(stderr, "Error from SoX resampler: %s\n", err);
 }
 
+void resample_with_sox_vhq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_sox(
+        soxr_quality_spec(SOXR_VHQ, 0),
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+void resample_with_sox_mq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_sox(
+        soxr_quality_spec(SOXR_MQ, 0),
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+void resample_with_sox_lq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_sox(
+        soxr_quality_spec(SOXR_LQ, 0),
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
 
 void resample_with_linear(
     double input_rate, double output_rate,
