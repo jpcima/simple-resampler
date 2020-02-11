@@ -11,11 +11,21 @@
 
    `Nch` number of channels
    `Ksize` convolution size (higher = more quality, latency, computation)
-   `Kover` oversampling of the lookup table, to lookup fractional values
+   `Ktable` length of the oversampled windowed sinc table
  */
-template <uint32_t Nch, uint32_t Ksize = 32, uint32_t Kover = 128>
+template <uint32_t Nch, uint32_t Ksize = 32, uint32_t Ktable = 128 * 1024>
 class Resampler {
 public:
+    static_assert(
+        (Ktable % Ksize) == 0,
+        "The table size must be a multiple of the convolution size.");
+
+    /**
+       Oversampling factor of the lookup table
+       It is the number of divisions between zero crossings of windowed sinc.
+     */
+    static constexpr uint32_t Kover = Ktable / Ksize;
+
     /**
        Set the ratio of rate conversion: ratio = Fs_out/Fs_in.
      */
