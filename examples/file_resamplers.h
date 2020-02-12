@@ -44,6 +44,18 @@ void resample_with_src_fastest(
     float *out, size_t out_frames,
     unsigned channels);
 
+void resample_with_speex_mq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels);
+
+void resample_with_speex_vhq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels);
+
 void resample_with_linear(
     double input_rate, double output_rate,
     const float *in, size_t in_frames,
@@ -61,7 +73,7 @@ struct ResamplingChoice {
     resample_file_t *resample;
 };
 
-static std::array<ResamplingChoice, 8> sResamplingChoices {{
+static std::array<ResamplingChoice, 10> sResamplingChoices {{
     {"mine", &resample_with_mine},
     {"soxvhq", &resample_with_sox_vhq},
     {"soxmq", &resample_with_sox_mq},
@@ -69,5 +81,7 @@ static std::array<ResamplingChoice, 8> sResamplingChoices {{
     {"srcvhq", &resample_with_src_best},
     {"srcmq", &resample_with_src_medium},
     {"srclq", &resample_with_src_fastest},
+    {"speexmq", &resample_with_speex_mq},
+    {"speexvhq", &resample_with_speex_vhq},
     {"linear", &resample_with_linear},
 }};

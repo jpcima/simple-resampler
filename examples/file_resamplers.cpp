@@ -2,6 +2,7 @@
 #include "resampler.h"
 #include <soxr.h>
 #include <samplerate.h>
+#include <speex/speex_resampler.h>
 
 void resample_with_mine(
     double input_rate, double output_rate,
@@ -167,6 +168,56 @@ void resample_with_src_fastest(
 {
     resample_with_src(
         SRC_SINC_FASTEST,
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+static void resample_with_speex(
+    int quality,
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    int err = 0;
+    SpeexResamplerState *src = speex_resampler_init(
+        channels, input_rate, output_rate, quality, &err);
+    if (!src) {
+        fprintf(stderr, "Error from Speex resampler: %s\n", speex_resampler_strerror(err));
+        return;
+    }
+
+    speex_resampler_skip_zeros(src);
+
+    spx_uint32_t in_spx = in_frames;
+    spx_uint32_t out_spx = out_frames;
+
+    speex_resampler_process_interleaved_float(
+        src, in, &in_spx, out, &out_spx);
+
+    speex_resampler_destroy(src);
+}
+
+void resample_with_speex_mq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_speex(
+        SPEEX_RESAMPLER_QUALITY_DEFAULT,
+        input_rate, output_rate,
+        in, in_frames, out, out_frames, channels);
+}
+
+void resample_with_speex_vhq(
+    double input_rate, double output_rate,
+    const float *in, size_t in_frames,
+    float *out, size_t out_frames,
+    unsigned channels)
+{
+    resample_with_speex(
+        SPEEX_RESAMPLER_QUALITY_MAX,
         input_rate, output_rate,
         in, in_frames, out, out_frames, channels);
 }
